@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurant Recommendation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center gap-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-semibold mb-4">Restaurant Recommendation</h1>
+        <form id="recommendation-form" class="mb-4">
+            <div class="mb-2">
+                <label for="restaurant-type" class="block text-gray-700 font-medium">Restaurant Type:</label>
+                <input type="text" id="restaurant-type" name="restaurant-type" required
+                       class="w-full px-3 py-2 rounded border focus:ring-blue-100">
+            </div>
+            <div class="mb-2">
+                <label for="restaurant-location" class="block text-gray-700 font-medium">Restaurant Location:</label>
+                <input type="text" id="restaurant-location" name="restaurant-location" required
+                       class="w-full px-3 py-2 rounded border focus:ring-blue-100">
+            </div>
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded mt-4 hover:bg-blue-600">
+                Get Recommendations
+            </button>
+        </form>
+        <div id="recommendations" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Recommendations will be displayed here -->
+        </div>
+    </div>
+    <script>
+        document.getElementById("recommendation-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const restaurantType = document.getElementById("restaurant-type").value;
+            const restaurantLocation = document.getElementById("restaurant-location").value;
+            
+            // Make a POST request to the back-end
+            fetch('/get_recommendations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "restaurant-type": restaurantType, "restaurant-location": restaurantLocation })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display recommended restaurants on the webpage
+                const recommendationsDiv = document.getElementById("recommendations");
+                recommendationsDiv.innerHTML = ''; // Clear previous content
+                for (const restaurant of data.recommendations) {
+                    const restaurantContainer = document.createElement("div");
+                    restaurantContainer.className = "border rounded p-3";
+                    restaurantContainer.innerHTML = `
+                        <h3 class="text-lg font-semibold">${restaurant.Name}</h3>
+                        <p>Street Address: ${restaurant["Street Address"]}</p>
+                        <p>Location: ${restaurant.Location}</p>
+                        <!-- Include other fields as needed -->
+                    `;
+                    recommendationsDiv.appendChild(restaurantContainer);
+                }
+                
+                // Hide the input form and button
+                document.getElementById("recommendation-form").style.display = "none";
+            });
+        });
+    </script>
+</body>
+</html>
